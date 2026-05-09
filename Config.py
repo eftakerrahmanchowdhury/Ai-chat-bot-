@@ -1,0 +1,269 @@
+"""
+Configuration file for Multi-Model AI Chatbot
+Customize providers, models, and settings here
+"""
+
+import os
+from typing import Dict, List, Tuple
+
+# ============================================================================
+# PROVIDER CONFIGURATION
+# ============================================================================
+
+PROVIDERS_CONFIG = {
+    "claude": {
+        "name": "Anthropic Claude",
+        "env_key": "ANTHROPIC_API_KEY",
+        "models": {
+            "Claude 3.5 Sonnet": "claude-3-5-sonnet-20241022",
+            "Claude 3 Opus": "claude-3-opus-20240229",
+            "Claude 3 Haiku": "claude-3-haiku-20240307",
+        },
+        "default_model": "claude-3-5-sonnet-20241022",
+        "max_tokens": 4096,
+        "description": "Most capable Claude model with enhanced reasoning"
+    },
+    
+    "gemini": {
+        "name": "Google Gemini",
+        "env_key": "GOOGLE_API_KEY",
+        "models": {
+            "Gemini 3.0 Pro": "gemini-3.0-pro",
+            "Gemini 2.0 Flash": "gemini-2.0-flash",
+            "Gemini 1.5 Pro": "gemini-1.5-pro",
+            "Gemini 1.5 Flash": "gemini-1.5-flash",
+        },
+        "default_model": "gemini-1.5-pro",
+        "max_tokens": 2048,
+        "description": "Google's multimodal AI with large context window"
+    },
+    
+    "gpt-4": {
+        "name": "OpenAI GPT-4",
+        "env_key": "OPENAI_API_KEY",
+        "models": {
+            "GPT-4o": "gpt-4o",
+            "GPT-4 Turbo": "gpt-4-turbo",
+            "GPT-4": "gpt-4",
+            "GPT-3.5 Turbo": "gpt-3.5-turbo",
+        },
+        "default_model": "gpt-4o",
+        "max_tokens": 2048,
+        "description": "OpenAI's advanced reasoning and code model"
+    },
+    
+    "mistral": {
+        "name": "Mistral AI",
+        "env_key": "MISTRAL_API_KEY",
+        "models": {
+            "Mistral Large": "mistral-large-latest",
+            "Mistral Medium": "mistral-medium-latest",
+            "Mistral Small": "mistral-small-latest",
+        },
+        "default_model": "mistral-large-latest",
+        "max_tokens": 1024,
+        "description": "Mistral's efficient and capable models"
+    },
+    
+    "banana": {
+        "name": "Banana.dev Nano",
+        "env_key": "BANANA_API_KEY",
+        "models": {
+            "Nano Banana": "nano-banana",
+            "Falcon 7B": "falcon-7b",
+        },
+        "default_model": "nano-banana",
+        "max_tokens": 512,
+        "description": "Lightweight edge models for fast inference"
+    }
+}
+
+# ============================================================================
+# CHATBOT SETTINGS
+# ============================================================================
+
+CHATBOT_CONFIG = {
+    # System prompt - customize the bot's personality and behavior
+    "system_prompt": """You are a helpful, intelligent, and friendly AI assistant. 
+Your role is to:
+- Provide accurate and thoughtful responses
+- Maintain context throughout conversations
+- Ask clarifying questions when needed
+- Be honest about limitations
+- Offer relevant follow-ups and suggestions
+- Adapt your communication style to the user's needs""",
+    
+    # Default provider if multiple are available
+    "default_provider": os.environ.get("DEFAULT_PROVIDER", "claude"),
+    
+    # Maximum conversation history to maintain (tokens)
+    "max_history_tokens": 8000,
+    
+    # Temperature for model responses (0.0 = deterministic, 1.0 = creative)
+    "temperature": 0.7,
+    
+    # Whether to display model info on startup
+    "show_startup_info": True,
+    
+    # Whether to save conversation history
+    "save_history": False,
+    "history_file": "conversation_history.json",
+}
+
+# ============================================================================
+# DISPLAY SETTINGS
+# ============================================================================
+
+DISPLAY_CONFIG = {
+    # Use emoji in output
+    "use_emoji": True,
+    
+    # Use colors in terminal output
+    "use_colors": True,
+    
+    # Display timing information
+    "show_timing": False,
+    
+    # Display token usage (if available)
+    "show_token_usage": False,
+    
+    # Display provider info on each response
+    "show_provider_info": True,
+}
+
+# ============================================================================
+# ADVANCED SETTINGS
+# ============================================================================
+
+ADVANCED_CONFIG = {
+    # Enable streaming responses
+    "streaming_enabled": False,
+    
+    # Retry failed requests
+    "retry_enabled": True,
+    "max_retries": 3,
+    
+    # Request timeout in seconds
+    "request_timeout": 30,
+    
+    # Enable response caching
+    "cache_responses": False,
+    "cache_dir": ".cache",
+    
+    # Log requests and responses
+    "logging_enabled": False,
+    "log_file": "chatbot.log",
+}
+
+# ============================================================================
+# MODEL COMPARISON MATRIX
+# ============================================================================
+
+MODEL_COMPARISON = {
+    "speed": {
+        "nano": 5,
+        "mistral-small": 4,
+        "gemini-flash": 4,
+        "gpt-3.5-turbo": 3,
+        "claude-haiku": 4,
+        "mistral-medium": 3,
+        "gpt-4-turbo": 2,
+        "gemini-pro": 2,
+        "claude-opus": 1,
+        "gpt-4o": 2,
+    },
+    "accuracy": {
+        "nano": 2,
+        "mistral-small": 3,
+        "gpt-3.5-turbo": 3,
+        "mistral-medium": 4,
+        "gemini-flash": 4,
+        "claude-haiku": 4,
+        "gpt-4-turbo": 5,
+        "gemini-pro": 5,
+        "claude-opus": 5,
+        "gpt-4o": 5,
+    },
+    "cost": {
+        "nano": 1,
+        "mistral-small": 2,
+        "gemini-flash": 2,
+        "gpt-3.5-turbo": 2,
+        "claude-haiku": 2,
+        "mistral-medium": 3,
+        "gemini-pro": 3,
+        "gpt-4-turbo": 4,
+        "claude-opus": 4,
+        "gpt-4o": 3,
+    }
+}
+
+# ============================================================================
+# UTILITY FUNCTIONS
+# ============================================================================
+
+def get_provider_config(provider_name: str) -> dict:
+    """Get configuration for a specific provider"""
+    return PROVIDERS_CONFIG.get(provider_name, {})
+
+def get_available_providers() -> List[str]:
+    """Get list of providers with available API keys"""
+    available = []
+    for provider, config in PROVIDERS_CONFIG.items():
+        if os.environ.get(config["env_key"]):
+            available.append(provider)
+    return available
+
+def get_models_for_provider(provider_name: str) -> Dict[str, str]:
+    """Get models for a specific provider"""
+    config = PROVIDERS_CONFIG.get(provider_name, {})
+    return config.get("models", {})
+
+def get_default_model(provider_name: str) -> str:
+    """Get default model for a provider"""
+    config = PROVIDERS_CONFIG.get(provider_name, {})
+    return config.get("default_model", "")
+
+def is_provider_available(provider_name: str) -> bool:
+    """Check if a provider's API key is configured"""
+    config = PROVIDERS_CONFIG.get(provider_name, {})
+    env_key = config.get("env_key", "")
+    return bool(os.environ.get(env_key))
+
+# ============================================================================
+# COMMAND ALIASES
+# ============================================================================
+
+COMMAND_ALIASES = {
+    "help": ["?", "h", "info"],
+    "provider": ["p", "model", "switch"],
+    "models": ["m", "list-models", "available"],
+    "clear": ["cls", "reset", "history-clear"],
+    "exit": ["quit", "q", "bye", "goodbye"],
+    "status": ["info", "current"],
+}
+
+# ============================================================================
+# PROMPT TEMPLATES
+# ============================================================================
+
+PROMPT_TEMPLATES = {
+    "summarize": "Please summarize the following text:\n{content}",
+    "explain": "Can you explain {topic} in simple terms?",
+    "translate": "Translate the following to {language}:\n{content}",
+    "code": "Write {language} code to {task}",
+    "creative": "Create something creative about {topic}",
+}
+
+if __name__ == "__main__":
+    # Test configuration
+    print("Available Providers:")
+    for provider in get_available_providers():
+        print(f"  ✓ {provider}")
+    
+    print("\nAll Configured Providers:")
+    for provider, config in PROVIDERS_CONFIG.items():
+        print(f"  - {config['name']}")
+        for model_name, model_id in config['models'].items():
+            print(f"      • {model_name}")
+
