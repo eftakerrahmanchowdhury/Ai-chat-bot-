@@ -7,6 +7,10 @@ import os
 import sys
 from typing import Optional, List, Dict
 from abc import ABC, abstractmethod
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Import API clients
 try:
@@ -146,8 +150,8 @@ class GPT4Provider(ModelProvider):
         response = self.client.chat.completions.create(
             model=self.model,
             max_tokens=1024,
-            system_prompt="You are a helpful, intelligent AI assistant. Provide accurate and thoughtful responses.",
-            messages=self.conversation_history
+            messages=self.conversation_history,
+            system="You are a helpful, intelligent AI assistant. Provide accurate and thoughtful responses."
         )
         
         assistant_message = response.choices[0].message.content
@@ -338,7 +342,10 @@ def main():
     
     if not available:
         print("\n❌ Error: No API keys found!")
-        print("\nPlease set at least one of these environment variables:")
+        print("\nPlease set up your .env file:")
+        print("  1. Copy .env.example to .env")
+        print("  2. Add your API keys to .env")
+        print("\nRequired API keys:")
         print("  - ANTHROPIC_API_KEY (for Claude)")
         print("  - GOOGLE_API_KEY (for Gemini)")
         print("  - OPENAI_API_KEY (for GPT-4)")
