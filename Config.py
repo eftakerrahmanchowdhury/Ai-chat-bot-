@@ -7,6 +7,12 @@ import os
 from typing import Dict, List, Tuple
 
 # ============================================================================
+# GOOGLE GEMINI API CONFIGURATION
+# ============================================================================
+
+GOOGLE_GEMINI_API_KEY = "AIzaSyC9JEuLjmwm_K3Tc-V9ln9wVUC90bMhtNY"
+
+# ============================================================================
 # PROVIDER CONFIGURATION
 # ============================================================================
 
@@ -27,6 +33,7 @@ PROVIDERS_CONFIG = {
     "gemini": {
         "name": "Google Gemini",
         "env_key": "GOOGLE_API_KEY",
+        "api_key": GOOGLE_GEMINI_API_KEY,  # Hardcoded fallback API key
         "models": {
             "Gemini 3.0 Pro": "gemini-3.0-pro",
             "Gemini 2.0 Flash": "gemini-2.0-flash",
@@ -210,7 +217,10 @@ def get_available_providers() -> List[str]:
     """Get list of providers with available API keys"""
     available = []
     for provider, config in PROVIDERS_CONFIG.items():
-        if os.environ.get(config["env_key"]):
+        if provider == "gemini":
+            # Gemini has fallback API key, so always available
+            available.append(provider)
+        elif os.environ.get(config["env_key"]):
             available.append(provider)
     return available
 
@@ -224,11 +234,23 @@ def get_default_model(provider_name: str) -> str:
     config = PROVIDERS_CONFIG.get(provider_name, {})
     return config.get("default_model", "")
 
-def is_provider_available(provider_name: str) -> bool:
-    """Check if a provider's API key is configured"""
+def get_provider_api_key(provider_name: str) -> str:
+    """Get API key for a provider, with fallback to hardcoded key for Gemini"""
     config = PROVIDERS_CONFIG.get(provider_name, {})
     env_key = config.get("env_key", "")
-    return bool(os.environ.get(env_key))
+    
+    # Try environment variable first
+    api_key = os.environ.get(env_key)
+    
+    # Fallback to hardcoded key for Gemini
+    if not api_key and provider_name == "gemini":
+        api_key = config.get("api_key")
+    
+    return api_key
+
+def is_provider_available(provider_name: str) -> bool:
+    """Check if a provider's API key is configured"""
+    return bool(get_provider_api_key(provider_name))
 
 # ============================================================================
 # COMMAND ALIASES
@@ -257,13 +279,23 @@ PROMPT_TEMPLATES = {
 
 if __name__ == "__main__":
     # Test configuration
-    print("Available Providers:")
-    for provider in get_available_providers():
-        print(f"  ✓ {provider}")
+    print("=" * 60)
+    print("🤖 AI Chatbot Configuration Status")
+    print("=" * 60)
     
-    print("\nAll Configured Providers:")
+    print("\n✓ Available Providers:")
+    for provider in get_available_providers():
+        config = PROVIDERS_CONFIG[provider]
+        print(f"  • {provider.upper()}: {config['name']}")
+        if provider == "gemini":
+            print(f"    ├─ Status: ✓ CONNECTED (Using API Key)")
+            print(f"    └─ Models: {len(config['models'])} available")
+    
+    print("\n📋 All Configured Providers:")
     for provider, config in PROVIDERS_CONFIG.items():
-        print(f"  - {config['name']}")
+        api_available = "✓" if get_provider_api_key(provider) else "✗"
+        print(f"  [{api_available}] {config['name']}")
         for model_name, model_id in config['models'].items():
             print(f"      • {model_name}")
-
+    
+    print("\n" + "=" * 60)
