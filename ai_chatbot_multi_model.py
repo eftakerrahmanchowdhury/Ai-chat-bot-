@@ -63,12 +63,13 @@ class ClaudeProvider(ModelProvider):
     """Anthropic Claude API provider"""
     
     MODELS = {
+        "Claude Opus 4.7": "claude-opus-4-7",
         "Claude 3.5 Sonnet": "claude-3-5-sonnet-20241022",
         "Claude 3 Opus": "claude-3-opus-20240229",
         "Claude 3 Haiku": "claude-3-haiku-20240307",
     }
     
-    def __init__(self, api_key: str, model: str = "claude-3-5-sonnet-20241022"):
+    def __init__(self, api_key: str, model: str = "claude-opus-4-7"):
         super().__init__(api_key)
         if not Anthropic:
             raise ImportError("Anthropic library not installed. Run: pip install anthropic")
@@ -79,12 +80,24 @@ class ClaudeProvider(ModelProvider):
         """Get response from Claude"""
         self.add_to_history("user", user_message)
         
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=1024,
-            system="You are a helpful, intelligent AI assistant. Provide accurate and thoughtful responses.",
-            messages=self.conversation_history
-        )
+        # Check if using Claude Opus 4.7 with extended thinking
+        if "opus-4-7" in self.model:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=20000,
+                thinking={
+                    "type": "adaptive"
+                },
+                system="You are a helpful, intelligent AI assistant. Provide accurate and thoughtful responses.",
+                messages=self.conversation_history
+            )
+        else:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=1024,
+                system="You are a helpful, intelligent AI assistant. Provide accurate and thoughtful responses.",
+                messages=self.conversation_history
+            )
         
         assistant_message = response.content[0].text
         self.add_to_history("assistant", assistant_message)
