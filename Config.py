@@ -21,13 +21,15 @@ PROVIDERS_CONFIG = {
         "name": "Anthropic Claude",
         "env_key": "ANTHROPIC_API_KEY",
         "models": {
+            "Claude Opus 4.7": "claude-opus-4-7",
             "Claude 3.5 Sonnet": "claude-3-5-sonnet-20241022",
             "Claude 3 Opus": "claude-3-opus-20240229",
             "Claude 3 Haiku": "claude-3-haiku-20240307",
         },
-        "default_model": "claude-3-5-sonnet-20241022",
-        "max_tokens": 4096,
-        "description": "Most capable Claude model with enhanced reasoning"
+        "default_model": "claude-opus-4-7",
+        "max_tokens": 20000,
+        "thinking_enabled": True,
+        "description": "Most capable Claude model with extended thinking and advanced reasoning"
     },
     
     "gemini": {
@@ -176,6 +178,7 @@ MODEL_COMPARISON = {
         "mistral-medium": 3,
         "gpt-4-turbo": 2,
         "gemini-pro": 2,
+        "claude-opus-4-7": 1,
         "claude-opus": 1,
         "gpt-4o": 2,
     },
@@ -188,6 +191,7 @@ MODEL_COMPARISON = {
         "claude-haiku": 4,
         "gpt-4-turbo": 5,
         "gemini-pro": 5,
+        "claude-opus-4-7": 5,
         "claude-opus": 5,
         "gpt-4o": 5,
     },
@@ -200,6 +204,7 @@ MODEL_COMPARISON = {
         "mistral-medium": 3,
         "gemini-pro": 3,
         "gpt-4-turbo": 4,
+        "claude-opus-4-7": 5,
         "claude-opus": 4,
         "gpt-4o": 3,
     }
@@ -252,6 +257,11 @@ def is_provider_available(provider_name: str) -> bool:
     """Check if a provider's API key is configured"""
     return bool(get_provider_api_key(provider_name))
 
+def is_thinking_enabled(provider_name: str) -> bool:
+    """Check if extended thinking is enabled for a provider"""
+    config = PROVIDERS_CONFIG.get(provider_name, {})
+    return config.get("thinking_enabled", False)
+
 # ============================================================================
 # COMMAND ALIASES
 # ============================================================================
@@ -294,7 +304,8 @@ if __name__ == "__main__":
     print("\n📋 All Configured Providers:")
     for provider, config in PROVIDERS_CONFIG.items():
         api_available = "✓" if get_provider_api_key(provider) else "✗"
-        print(f"  [{api_available}] {config['name']}")
+        thinking_status = " (Extended Thinking)" if is_thinking_enabled(provider) else ""
+        print(f"  [{api_available}] {config['name']}{thinking_status}")
         for model_name, model_id in config['models'].items():
             print(f"      • {model_name}")
     
