@@ -12,6 +12,9 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# Google Gemini API Configuration
+GOOGLE_API_KEY = "AIzaSyC9JEuLjmwm_K3Tc-V9ln9wVUC90bMhtNY"
+
 # Import API clients
 try:
     from anthropic import Anthropic
@@ -106,7 +109,11 @@ class GeminiProvider(ModelProvider):
         super().__init__(api_key)
         if not genai:
             raise ImportError("Google Generative AI library not installed. Run: pip install google-generativeai")
+        
+        # Configure Google Gemini API with the provided API key
         genai.configure(api_key=api_key)
+        print(f"✓ Google Gemini API configured successfully with API Key: {api_key[:20]}...")
+        
         self.model = genai.GenerativeModel(model)
         self.chat = self.model.start_chat(history=[])
     
@@ -114,11 +121,16 @@ class GeminiProvider(ModelProvider):
         """Get response from Gemini"""
         self.add_to_history("user", user_message)
         
-        response = self.chat.send_message(user_message)
-        assistant_message = response.text
-        
-        self.add_to_history("assistant", assistant_message)
-        return assistant_message
+        try:
+            response = self.chat.send_message(user_message)
+            assistant_message = response.text
+            
+            self.add_to_history("assistant", assistant_message)
+            return assistant_message
+        except Exception as e:
+            error_message = f"Error getting response from Gemini: {str(e)}"
+            print(f"❌ {error_message}")
+            return error_message
     
     def clear_history(self):
         """Clear conversation history"""
@@ -260,8 +272,17 @@ class ChatbotManager:
         """List providers with available API keys"""
         available = []
         for provider_name, (_, env_key) in self.PROVIDERS.items():
-            if os.environ.get(env_key):
+            api_key = None
+            
+            # Special handling for Gemini - use hardcoded API key as fallback
+            if provider_name == "gemini":
+                api_key = os.environ.get(env_key) or GOOGLE_API_KEY
+            else:
+                api_key = os.environ.get(env_key)
+            
+            if api_key:
                 available.append(provider_name)
+        
         return available
     
     def list_models(self, provider_name: str) -> Dict[str, str]:
@@ -279,7 +300,12 @@ class ChatbotManager:
             return False
         
         provider_class, env_key = self.PROVIDERS[provider_name]
-        api_key = os.environ.get(env_key)
+        
+        # Special handling for Gemini - use hardcoded API key as fallback
+        if provider_name == "gemini":
+            api_key = os.environ.get(env_key) or GOOGLE_API_KEY
+        else:
+            api_key = os.environ.get(env_key)
         
         if not api_key:
             print(f"Error: {env_key} environment variable not set.")
@@ -332,7 +358,7 @@ def display_help():
 def main():
     """Main chatbot function"""
     print("=" * 60)
-    print("🤖 Multi-Model AI Chatbot")
+    print("🤖 Multi-Model AI Chatbot with Google Gemini")
     print("=" * 60)
     
     manager = ChatbotManager()
